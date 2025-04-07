@@ -1,0 +1,32 @@
+package dtos;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import static play.libs.Json.mapper;
+
+public class TokenResponse {
+    private final String refreshToken;
+    private final String accessToken;
+    private final int expiresIn;
+
+    public TokenResponse(String responseBody) throws Exception {
+        final JsonNode json = mapper().readTree(responseBody);
+
+        this.refreshToken = json.get("refresh_token").asText();
+        this.accessToken = json.get("access_token").asText();
+        // multiplied by 0.9 to (over) simulate the time spent on the request
+        this.expiresIn = (int) (json.get("expires_in").asInt() * 0.9);
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public int getExpiresIn() {
+        return expiresIn;
+    }
+}

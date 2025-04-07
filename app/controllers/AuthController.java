@@ -1,56 +1,60 @@
 package controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import play.libs.Json;
-import play.libs.ws.WSClient;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import services.AuthService;
-import views.html.auth;
+import services.CacheService;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletionStage;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 public class AuthController extends Controller {
     private final AuthService authService;
-    private final WSClient ws;
+    private final CacheService cacheService;
 
     @Inject
-    public AuthController(WSClient ws, AuthService authService) {
+    public AuthController(AuthService authService, CacheService cacheService) {
         this.authService = authService;
-        this.ws = ws;
+        this.cacheService = cacheService;
     }
 
-    public Result auth(Http.Request request) {
-        final String accessToken = request.session().get("accessToken").orElse(null);
-        final String authorizationUrl = accessToken == null ? authService.getAuthorizationUrl() : null;
+    public CompletionStage<Result> auth(Http.Request request) {
+        final String refreshToken = request.session().get("refreshToken").orElse(null);
 
-        return ok(auth.render(authorizationUrl, accessToken));
+        if (refreshToken == null) {
+            return completedFuture(ok(views.html.auth.render(authService.getInstallUrl(), null)));
+        }
+
+        return cacheService.getAccessToken(refreshToken).thenCompose(accessToken -> {
+            if (accessToken.isPresent()) {
+                return completedFuture(ok(views.html.auth.render(null, accessToken.get())));
+            }
+
+            return authService.fetchAndCacheOAuthTokens(authService.getRefreshUrl(refreshToken))
+                    .thenApply(newRefreshToken -> redirect("/").addingToSession(request, "refreshToken", newRefreshToken))
+                    .exceptionally(e -> status(500, e.getMessage()));
+        });
     }
 
     public CompletionStage<Result> callback(String code, Http.Request request) {
-        return ws.url(authService.getTokenUrl(code))
-                .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                .post("")
-                .thenApply(response -> {
-                    if (response.getStatus() != 200) {
-                        return status(response.getStatus(), response.getBody());
-                    }
-
-                    try {
-                        return redirect("/").addingToSession(
-                                request,
-                                "accessToken",
-                                Json.mapper().readTree(response.getBody()).get("access_token").asText()
-                        );
-                    } catch (JsonProcessingException e) {
-                        return status(500, e.getMessage());
-                    }
-                });
+        return authService.fetchAndCacheOAuthTokens(authService.getAuthorizationUrl(code))
+                .thenApply(refreshToken -> redirect("/").addingToSession(request, "refreshToken", refreshToken))
+                .exceptionally(e -> status(500, e.getMessage()));
     }
 
-    public Result logout(Http.Request request) {
-        return redirect("/").removingFromSession(request, "accessToken");
+
+    public CompletionStage<Result> logout(Http.Request request) {
+        final String refreshToken = request.session().get("refreshToken").orElse(null);
+
+        if (refreshToken == null) {
+            return completedFuture(redirect("/"));
+        }
+
+        return cacheService
+                .deleteAccessToken(refreshToken)
+                .thenApply(done -> redirect("/").removingFromSession(request, "refreshToken"));
     }
 }
