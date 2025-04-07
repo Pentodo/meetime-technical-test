@@ -1,5 +1,6 @@
 package controllers;
 
+import annotations.WithRefreshToken;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -45,13 +46,9 @@ public class AuthController extends Controller {
                 .exceptionally(e -> status(500, e.getMessage()));
     }
 
-
+    @WithRefreshToken
     public CompletionStage<Result> logout(Http.Request request) {
         final String refreshToken = request.session().get("refreshToken").orElse(null);
-
-        if (refreshToken == null) {
-            return completedFuture(redirect("/"));
-        }
 
         return cacheService
                 .deleteAccessToken(refreshToken)
