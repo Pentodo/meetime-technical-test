@@ -59,7 +59,7 @@ public class AuthService {
                     }
 
                     try {
-                        TokenResponse dto = new TokenResponse(body);
+                        TokenResponse dto = new TokenResponse(response.asJson());
                         // returning refreshToken because it is needed to identify the cache
                         return cacheService.saveAccessToken(dto).thenApply(done -> dto.getRefreshToken());
                     } catch (Exception e) {
