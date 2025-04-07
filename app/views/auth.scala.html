@@ -1,6 +1,11 @@
-@(authorizationUrl: String)
+@(authorizationUrl: String, accessToken: String)
 
 @main("Auth Page") {
     <h1>Auth Page</h1>
-    <p>Click <a href="@authorizationUrl">here</a> to authenticate</p>
+    @if(authorizationUrl != null) {
+        <p>Click <a href="@authorizationUrl">here</a> to authenticate</p>
+    } else {
+        <p>You're authenticated! Click <a href="/logout">here</a> to logout</p>
+        <p>Token: @accessToken</p>
+    }
 }
