@@ -47,13 +47,13 @@ Following the **MVC pattern**:
 
 1. Clone the repository to your local machine:
    ```bash
-   git clone https://github.com/your-repo/meetime-technical-test.git
+   git clone https://github.com/Pentodo/meetime-technical-test.git
    ```
 2. Configure your environment variables in the `application.conf` file:
    ```bash
    auth {
-       clientId = "your-client-id"
-       clientSecret = "your-client-secret"
+       clientId = "your-app-client-id"
+       clientSecret = "your-app-client-secret"
        redirectUri = "http://localhost:9000/callback"
        scope = "oauth,crm.objects.contacts.read,crm.objects.contacts.write"
    }
