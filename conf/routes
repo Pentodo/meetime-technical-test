@@ -11,5 +11,8 @@ GET         /logout              controllers.AuthController.logout(request: Requ
 GET         /contact             controllers.ContactController.contact(request: Request)
 POST        /contact             controllers.ContactController.addContact(request: Request)
 
+# webhooks
+POST        /webhook             controllers.WebhookController.handle(request: Request)
+
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file        controllers.Assets.versioned(path="/public", file: Asset)
