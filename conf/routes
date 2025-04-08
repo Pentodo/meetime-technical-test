@@ -2,11 +2,14 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET        /                    controllers.AuthController.auth(request: Request)
-GET        /callback            controllers.AuthController.callback(code: String, request: Request)
-GET        /logout              controllers.AuthController.logout(request: Request)
+# oauth
+GET         /                    controllers.AuthController.auth(request: Request)
+GET         /callback            controllers.AuthController.callback(code: String, request: Request)
+GET         /logout              controllers.AuthController.logout(request: Request)
 
-GET        /contact             controllers.ContactController.contact()
+# contacts
+GET         /contact             controllers.ContactController.contact(request: Request)
+POST        /contact             controllers.ContactController.addContact(request: Request)
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file        controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file        controllers.Assets.versioned(path="/public", file: Asset)

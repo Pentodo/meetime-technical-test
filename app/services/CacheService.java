@@ -3,6 +3,7 @@ package services;
 import dtos.TokenResponse;
 import org.apache.pekko.Done;
 import play.cache.AsyncCacheApi;
+import play.mvc.Http;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,6 +25,12 @@ public class CacheService {
 
     public CompletionStage<Optional<String>> getAccessToken(String refreshToken) {
         return cache.get(refreshToken);
+    }
+
+    public CompletionStage<Optional<String>> getAccessToken(Http.Request request) {
+        final String refreshToken = request.session().get("refreshToken").orElse(null);
+
+        return getAccessToken(refreshToken);
     }
 
     public CompletionStage<Done> deleteAccessToken(String refreshToken) {

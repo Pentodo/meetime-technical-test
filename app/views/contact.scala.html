@@ -1,23 +1,29 @@
-@(contacts: List[Contact])
+@import dtos.ContactDto
+@import helper._
+@import play.data.Form
+
+@import java.util
+@(contacts: util.List[Contact], contactForm: Form[ContactDto])(implicit request: Http.Request)
 
 @main("Contact Page") {
     <h1>Contact Page</h1>
 
-    <form method="post">
+    <form method="post" action="@routes.ContactController.addContact()">
+        @CSRF.formField
         <div>
             <label for="email">E-mail:</label>
-            <input type="email" id="email" name="email" required>
+            <input type="email" id="email" name="email" value="@contactForm.field("email").value" required>
         </div>
         <div>
             <label for="firstname">First Name:</label>
-            <input type="text" id="firstname" name="firstname">
+            <input type="text" id="firstname" name="firstname" value="@contactForm.field("firstname").value">
         </div>
         <div>
             <label for="lastname">Last Name:</label>
-            <input type="text" id="lastname" name="lastname">
+            <input type="text" id="lastname" name="lastname" value="@contactForm.field("lastname").value">
         </div>
         <div>
-            <button type="submit">Create</button>
+            <button type="submit">Add</button>
         </div>
     </form>
 
@@ -43,4 +49,7 @@
             </tbody>
         </table>
     }
+
+    <br>
+    <a href="/"><button>Go to Auth Page</button></a>
 }
