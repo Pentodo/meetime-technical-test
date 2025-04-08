@@ -1,5 +1,6 @@
 package controllers;
 
+import annotations.WithRateLimit;
 import annotations.WithRefreshToken;
 import dtos.ContactDto;
 import play.data.Form;
@@ -24,6 +25,7 @@ public class ContactController extends Controller {
     }
 
     @WithRefreshToken
+    @WithRateLimit
     public CompletionStage<Result> contact(Http.Request request) {
         return contactService.fetchContacts(request)
                 .thenApply(contacts -> ok(views.html.contact.render(contacts, contactForm, request)))
@@ -31,6 +33,7 @@ public class ContactController extends Controller {
     }
 
     @WithRefreshToken
+    @WithRateLimit
     public CompletionStage<Result> addContact(Http.Request request) {
         Form<ContactDto> boundForm = contactForm.bindFromRequest(request);
 
